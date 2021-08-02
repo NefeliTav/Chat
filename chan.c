@@ -77,6 +77,27 @@ int main(int argc, char **argv)
         {
             printf("CHAN: %s\n", message2);
         }
+        sem_wait(send1);
+
+        smemory->isSame = 0;
+        do
+        {
+            double x = (double)rand() / (RAND_MAX);
+            if (x < smemory->probability)
+            {
+                //printf("%f\n",x);
+                strcpy(message1, message2); //send message to enc1
+                message1[0] = '*';
+                // printf("Message changed\n");
+            }
+            else
+            {
+                strcpy(message1, message2);
+            }
+            *checksum1 = *checksum2; //send checksum to enc1
+            sem_post(receive1);
+            sem_wait(mutexCheck);
+        } while (smemory->isSame == 0);
 
         if (strcmp(message2, "TERM") == 0)
         {

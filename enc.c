@@ -56,6 +56,28 @@ int main(int argc, char **argv)
         messageP = (smemory->messagePENC2);
         messageCh = (smemory->messageENCCh2);
         checksum = &(smemory->checksum2);
+        //enc2
+        sem_wait(receiveCh);
+        sem_wait(sendP);
+        if (debug)
+        {
+            printf("ENC2: %s\n", messageCh);
+        }
+        int count = 0;
+        while (hash(messageCh) != *checksum) //loop until correct
+        {
+            count++;
+            sem_post(&(smemory->mutexCheck));
+            sem_wait(receiveCh); // waits to read from Chan new message
+        }
+        if (count != 0)
+        {
+            printf("Failed to receive message %d times until success\n", count);
+        }
+        smemory->isSame = 1; //correct message
+        sem_post(&(smemory->mutexCheck));
+        strcpy(messageP, messageCh); //send message to p2
+        sem_post(receiveP);
     }
     if (!isSecond || strcmp(messageCh, "TERM") != 0)
     {
@@ -79,6 +101,29 @@ int main(int argc, char **argv)
             sem_post(sendCh);
             sem_wait(receiveCh);
             sem_wait(sendP);
+            if (debug)
+            {
+                printf("ENC2: %s\n", messageCh);
+            }
+            int count = 0;
+            while (hash(messageCh) != *checksum) //check if correct and loop until checksum correct
+            {
+                count++;
+                sem_post(&(smemory->mutexCheck)); //can read hash
+                sem_wait(receiveCh);              //wait to read from chan new message
+            }
+            if (count != 0)
+            {
+                printf("Failed to receive message %d times until success\n", count);
+            }
+            smemory->isSame = 1;
+            sem_post(&(smemory->mutexCheck)); //can read hash
+            strcpy(messageP, messageCh);      //send message to p
+            sem_post(receiveP);               //p can read
+            if (strcmp(messageCh, "TERM") == 0)
+            {
+                break;
+            }
         }
     }
 
