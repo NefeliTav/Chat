@@ -41,6 +41,7 @@ int main(int argc, char **argv)
     mutexCheck = &(smemory->mutexCheck);
     while (1)
     {
+        // chan receives message from enc1 and sends it to enc2
         sem_wait(receive1); //wait enc1 to write
         if (debug)
         {
@@ -71,6 +72,8 @@ int main(int argc, char **argv)
             break;
         }
         sleep(1);
+        // chan receives message from enc2 and sends it to enc1
+
         sem_post(send2);
         sem_wait(receive2);
         if (debug)

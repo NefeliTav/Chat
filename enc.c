@@ -27,7 +27,7 @@ int main(int argc, char **argv)
         perror("***Attach Failed***\n");
         exit(1);
     }
-    if (!isSecond) //first time/p1 to p2
+    if (!isSecond) //first time / p1 to p2
     {
         sprintf(shmid_str, "%d", shmid);
 
@@ -56,7 +56,8 @@ int main(int argc, char **argv)
         messageP = (smemory->messagePENC2);
         messageCh = (smemory->messageENCCh2);
         checksum = &(smemory->checksum2);
-        //enc2
+
+        // enc2 receives message
         sem_wait(receiveCh);
         sem_wait(sendP);
         if (debug)
@@ -83,6 +84,7 @@ int main(int argc, char **argv)
     {
         while (1)
         {
+            // enc receives message from p and sends it to chan
             sem_wait(sendP);
             if (debug)
             {
@@ -101,6 +103,8 @@ int main(int argc, char **argv)
             sem_post(sendCh);
             sem_wait(receiveCh);
             sem_wait(sendP);
+
+            // enc receives message from chan and sends it to p
             if (debug)
             {
                 printf("ENC2: %s\n", messageCh);

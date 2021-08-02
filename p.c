@@ -140,6 +140,7 @@ int main(int argc, char **argv)
     }
     if (isSecond) // p2
     {
+        // p2 receives message
         sem_wait(send);
         printf("-P2: %s\n", message); //received message
         sem_post(send);
@@ -148,6 +149,7 @@ int main(int argc, char **argv)
     {
         while (1)
         {
+            // p sends message
             sem_wait(send);
             printf("Type a message:\n");
             fgets(message, MAX_MSG_SZ, stdin); //write message
@@ -161,6 +163,8 @@ int main(int argc, char **argv)
             {
                 break; //stop loop
             }
+
+            // p receives message
             sleep(1);
             sem_wait(send);
             printf("-P%d: %s\n", isSecond + 1, message); //received message
