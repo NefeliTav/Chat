@@ -6,7 +6,7 @@ The program simulates a simple chat application, using shared memory and semapho
 make clean
 ```
 
-##Compile
+## Compile
 ```
 make
 ```
