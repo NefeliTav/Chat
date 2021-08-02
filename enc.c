@@ -27,10 +27,18 @@ int main(int argc, char **argv)
         perror("***Attach Failed***\n");
         exit(1);
     }
-    if (!isSecond) //first time / p1 to p2
+    if (!isSecond) //first time/p1 to p2
     {
         sprintf(shmid_str, "%d", shmid);
 
+        if ((CHAN = fork()) < 0)
+            perror("***Fork Failed***\n");
+        else if (CHAN == 0)
+        {
+            execl("chan", "chan", "-s", shmid_str, (char *)NULL); //exec , chan.c file
+            perror("***Execl Failed***\n");
+            exit(1);
+        }
         receiveP = &(smemory->mutexP1_ENC1); //1
         sendP = &(smemory->mutexENC1_P1);    //0
         sendCh = &(smemory->mutexENC1_Ch);
@@ -58,7 +66,6 @@ int main(int argc, char **argv)
             {
                 printf("ENC%d:%s\n", isSecond + 1, messageP);
             }
-
             sem_wait(sendCh);
             strcpy(messageCh, messageP); //send message to chan
             *checksum = hash(messageCh); //calculate first checksum
@@ -72,11 +79,6 @@ int main(int argc, char **argv)
             sem_post(sendCh);
             sem_wait(receiveCh);
             sem_wait(sendP);
-
-            if (strcmp(messageCh, "TERM") == 0)
-            {
-                break;
-            }
         }
     }
 
