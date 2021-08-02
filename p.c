@@ -138,7 +138,12 @@ int main(int argc, char **argv)
         perror("***Execl Failed***\n");
         exit(1);
     }
-
+    if (isSecond) // p2
+    {
+        sem_wait(send);
+        printf("-P2: %s\n", message); //received message
+        sem_post(send);
+    }
     if (!isSecond || strcmp(message, "TERM") != 0)
     {
         while (1)
@@ -156,6 +161,14 @@ int main(int argc, char **argv)
             {
                 break; //stop loop
             }
+            sleep(1);
+            sem_wait(send);
+            printf("-P%d: %s\n", isSecond + 1, message); //received message
+            if (strcmp(message, "TERM") == 0)
+            {
+                break;
+            }
+            sem_post(send);
         }
     }
 
