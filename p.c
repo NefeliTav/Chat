@@ -106,6 +106,59 @@ int main(int argc, char **argv)
         }
     }
 
+    if (!isSecond) //p1 sends first and then receives
+    {
+        send = &(smemory->mutexP1_ENC1);
+        receive = &(smemory->mutexENC1_P1);
+        message = (smemory->messagePENC1);
+    }
+    else //p2 receives first and then sends
+    {
+        send = &(smemory->mutexP2_ENC2);
+        receive = &(smemory->mutexENC2_P2);
+        message = (smemory->messagePENC2);
+    }
+
+    if ((ENC = fork()) < 0)
+    {
+        perror("***Fork Failed***\n");
+        exit(1);
+    }
+    else if (ENC == 0) //child process
+    {
+        sprintf(shmid_str, "%d", shmid); //shared memory id to string
+        if (!isSecond)                   //p1
+        {
+            execl("enc", "enc", "-s", shmid_str, "-f", "0", (char *)NULL); //exec , enc.c file
+        }
+        else //p2
+        {
+            execl("enc", "enc", "-s", shmid_str, "-f", "1", (char *)NULL);
+        }
+        perror("***Execl Failed***\n");
+        exit(1);
+    }
+
+    if (!isSecond || strcmp(message, "TERM") != 0)
+    {
+        while (1)
+        {
+            sem_wait(send);
+            printf("Type a message:\n");
+            fgets(message, MAX_MSG_SZ, stdin); //write message
+            if (message[strlen(message) - 1] == '\n')
+            {
+                message[strlen(message) - 1] = '\0'; //avoid comparing "TERM" with "TERM\n"
+            }
+
+            sem_post(receive);
+            if (strcmp(message, "TERM") == 0)
+            {
+                break; //stop loop
+            }
+        }
+    }
+
     do
     {
         if (waitpid(ENC, &status, WUNTRACED | WCONTINUED) == -1) //wait for child to finish
