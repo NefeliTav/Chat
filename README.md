@@ -1,5 +1,5 @@
 # Chat
-The program simulates a simple chat application, using shared memory and semaphores.
+The program simulates a simple chat application, using shared memory and semaphores. Messages are sent from one process to another, passing through some intermediate processes that may modify the message. The checksum of the message is compared to its hash and if they are different, the message is sent again. The probability of the messsage changing is given as input from the user.
 
 ## Clean
 ```
